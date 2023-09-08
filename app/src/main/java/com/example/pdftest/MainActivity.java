@@ -1,7 +1,11 @@
 package com.example.pdftest;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,6 +15,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.pdf.PdfDocument;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -23,8 +28,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import androidmads.library.qrgenearator.QRGContents;
@@ -47,14 +56,25 @@ public class MainActivity extends AppCompatActivity {
     String customerName = "PLACEHOLDER";
     TextInputEditText txtUserName;
     TextInputEditText txtName;
+    TextInputEditText txtStreet;
+    TextInputEditText txtCity;
+    TextInputEditText txtCountry;
+    TextInputEditText txtICO;
+    TextInputEditText txtDIC;
+    TextInputEditText txtIBAN;
+    TextInputEditText txtBankAcc;
+    TextInputEditText txtSWIFT;
     Spinner txtCur;
+    private static final String PLACEHOLDER = "N/A";
+    private static final String CHANNEL_ID = "MyNotificationChannel";
     EditText txtAmount;
     EditText txtVar;
     EditText txtPrice;
     String userName;// = "Jan Štýbar";
-    String iban = "CZ0827000000001387862362";
-    String bankac = "placeholder448";
-    String street = "Balcarova 2241/7";
+    String iban = "CZ082700000000484784959";
+    String bankAcc = "placeholder448";
+    String swift;
+    String street;
     String city = "Ostrava";
     String country = "CZECH REPUBLIC";
     String ico = "15199891";
@@ -63,11 +83,16 @@ public class MainActivity extends AppCompatActivity {
     String amtStr = "2";
     String priceStr = "500";
 
+    Intent intent = new Intent(this, MainActivity.class);
+    intent.putExtra("ACTION", "YOUR_ACTION");
+
+    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
     private Button generateQrBtn;
     QRGEncoder qrgEncoder;
 
+    // Displaying the main layout
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,10 +100,12 @@ public class MainActivity extends AppCompatActivity {
         askPermissions();
     }
 
+    // Asking necessary permissions
     private void askPermissions() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
     }
 
+    // Displaying invoice creation layout
     public void loadAddingLayout(View v){
         setContentView(R.layout.new_window);
         btnCreatePDF = findViewById(R.id.btnCreatePdf);
@@ -95,17 +122,44 @@ public class MainActivity extends AppCompatActivity {
         //ImageView imgQR = findViewById(R.id.image_qrc);
     }
 
+    // Leaving current layout
     public void leaveLayout(View v){
         setContentView(R.layout.activity_main);
     }
 
+    // Displaying personal information layout
     public void loadInfoLayout(View v){
         setContentView(R.layout.personal_info);
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
 
+        String retrievedUser = sharedPreferences.getString("User", "Not set yet");
         txtUserName = findViewById(R.id.edit_user_name);
-        String oldretrievedValue = sharedPreferences.getString("User", "Not set yet");
-        txtUserName.setHint(oldretrievedValue);
+        txtUserName.setHint(retrievedUser);
+        String retrievedStreet = sharedPreferences.getString("Street", "Not set yet");
+        txtStreet = findViewById(R.id.edit_street_name);
+        txtStreet.setHint(retrievedStreet);
+        String retrievedCity = sharedPreferences.getString("City", "Not set yet");
+        txtCity = findViewById(R.id.edit_city);
+        txtCity.setHint(retrievedCity);
+        String retrievedCountry = sharedPreferences.getString("Country", "Not set yet");
+        txtCountry = findViewById(R.id.edit_country);
+        txtCountry.setHint(retrievedCountry);
+        String retrievedICO = sharedPreferences.getString("ICO", "Not set yet");
+        txtICO = findViewById(R.id.edit_ico);
+        txtICO.setHint(retrievedICO);
+        String retrievedDIC = sharedPreferences.getString("DIC", "Not set yet");
+        txtDIC = findViewById(R.id.edit_dic);
+        txtDIC.setHint(retrievedDIC);
+        String retrievedBankAcc = sharedPreferences.getString("BankAcc", "Not set yet");
+        txtBankAcc = findViewById(R.id.edit_bank_acc);
+        txtBankAcc.setHint(retrievedBankAcc);
+        String retrievedIBAN = sharedPreferences.getString("IBAN", "Not set yet");
+        txtIBAN = findViewById(R.id.edit_iban);
+        txtIBAN.setHint(retrievedIBAN);
+        String retrievedSWIFT = sharedPreferences.getString("SWIFT", "Not set yet");
+        txtSWIFT = findViewById(R.id.edit_swift);
+        txtSWIFT.setHint(retrievedSWIFT);
+
 
         btnSaveInfo = findViewById(R.id.btn_save_info);
         btnSaveInfo.setOnClickListener(new View.OnClickListener() {
@@ -117,20 +171,68 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Saving user personal information
     private void saveUserInfo() {
         userName = txtUserName.getText().toString();
-        Toast.makeText(this, userName, Toast.LENGTH_SHORT).show();
+        street = txtStreet.getText().toString();
+        city = txtCity.getText().toString();
+        country = txtCountry.getText().toString();
+        ico = txtICO.getText().toString();
+        dic = txtDIC.getText().toString();
+        bankAcc = txtBankAcc.getText().toString();
+        iban = txtIBAN.getText().toString();
+        swift = txtSWIFT.getText().toString();
+
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("User", userName);
+        editor.putString("Street", street);
+        editor.putString("City", city);
+        editor.putString("Country", country);
+        editor.putString("ICO", ico);
+        editor.putString("DIC", dic);
+        editor.putString("BankAcc", bankAcc);
+        editor.putString("IBAN", iban);
+        editor.putString("SWIFT", swift);
+
         editor.apply();
-
-        String retrievedValue = sharedPreferences.getString("User", "Not set yet");
-        Toast.makeText(this, retrievedValue, Toast.LENGTH_SHORT).show();
-        //txtUserName.setHint("janicka");
-
     }
 
+
+    public void showNotification(View view) {
+        // Create a notification channel (required for Android 8.0 and higher)
+        createNotificationChannel();
+
+        // Build the notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.profile_foreground)
+                .setContentTitle("Button Pressed")
+                .setContentText("You pressed the button and triggered this notification!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        // Show the notification
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(1, builder.build());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "My Notification Channel";
+            String description = "My custom notification channel";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    // Creating and saving the created PDF
     private void createPDF() {
         PdfDocument document = new PdfDocument();
         PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(595, 842, 1).create();
@@ -223,18 +325,19 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawRect(drawRect, borderPaint);
 
         // Supplier
-        int tableftspace = leftspace+10;
-        canvas.drawText(userName, tableftspace, 130, smallpaintbold);
-        canvas.drawText(street, tableftspace, 150, smallpaint);
-        canvas.drawText(city, tableftspace, 170, smallpaint);
-        canvas.drawText(country, tableftspace, 190, smallpaint);
-        canvas.drawText("IČO: "+ico, tableftspace, 210, smallpaint);
-        canvas.drawText("DIČ: "+dic, tableftspace, 230, smallpaint);
-        canvas.drawText(bankac, tableftspace, 245,  tinypaint);
-        canvas.drawText(iban, tableftspace, 260, tinypaint);
+        int tableftspace = leftspace + 10;
+        canvas.drawText(userName != null ? userName : PLACEHOLDER, tableftspace, 130, smallpaintbold);
+        canvas.drawText(street != null ? street : PLACEHOLDER, tableftspace, 150, smallpaint);
+        canvas.drawText(city != null ? city : PLACEHOLDER, tableftspace, 170, smallpaint);
+        canvas.drawText(country != null ? country : PLACEHOLDER, tableftspace, 190, smallpaint);
+        canvas.drawText("IČO: " + (ico != null ? ico : PLACEHOLDER), tableftspace, 210, smallpaint);
+        canvas.drawText("DIČ: " + (dic != null ? dic : PLACEHOLDER), tableftspace, 230, smallpaint);
+        canvas.drawText(bankAcc != null ? bankAcc : PLACEHOLDER, tableftspace, 245, tinypaint);
+        canvas.drawText(iban != null ? iban : PLACEHOLDER, tableftspace, 260, tinypaint);
+
 
         // Supplied
-        canvas.drawText(customerName, 320, 130, smallpaintbold);
+        canvas.drawText(customerName != null ? customerName : PLACEHOLDER, 320, 130, smallpaintbold);
 
         // QR Payment
         Integer qrtop = 320;
@@ -259,8 +362,14 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawText(todayCode, secondleft, 370, tinypaint);
         canvas.drawText("Datum zd. plnění", leftspace, 390, tinypaint);
         canvas.drawText(todayCode, secondleft, 390, tinypaint);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, 1); // Add one month
+
+        Date oneMonthFromNow = calendar.getTime();
+        DateFormat dateFormat = new SimpleDateFormat("dd.MM.YYYY");
+        String oneMonthDateString = dateFormat.format(oneMonthFromNow);
         canvas.drawText("Datum splatnosti", leftspace, 410, tinypaint);
-        canvas.drawText(todayCode, secondleft, 410, tinypaint);
+        canvas.drawText(oneMonthDateString, secondleft, 410, tinypaint);
         canvas.drawText("Forma úhrady", leftspace, 430, tinypaint);
         canvas.drawText("Bankovní převod", secondleft, 430, tinypaint);
 
@@ -286,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
         //Summary
         drawRect.set(150, 650, 450 ,680);
         canvas.drawRect(drawRect, borderPaint);
-        canvas.drawText("Cena celkem: "+Float.toString(finalCost) + "CZK", 170, 673, paint);
+        canvas.drawText("Cena celkem: "+Float.toString(finalCost) + " CZK", 170, 673, paint);
 
 
         document.finishPage(page);
@@ -299,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
             document.writeTo(fos);
             document.close();
             fos.close();
-            Toast.makeText(this, "Written Successfully!!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Saved succesfully to documents directory", Toast.LENGTH_SHORT).show();
         } catch (FileNotFoundException e) {
             Log.d("mylog", "Error while writing " + e.toString());
             throw new RuntimeException(e);

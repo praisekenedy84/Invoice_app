@@ -5,6 +5,7 @@
     android:id="@+id/person_info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:onClick="showNotification"
     app:circularflow_radiusInDP="560"
     tools:context=".MainActivity">
 
@@ -47,5 +48,14 @@
         app:layout_constraintBottom_toTopOf="@+id/floating_add"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/profile_foreground" />
+
+    <Button
+        android:id="@+id/button"
+        android:onClick="showNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        tools:layout_editor_absoluteX="152dp"
+        tools:layout_editor_absoluteY="278dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
