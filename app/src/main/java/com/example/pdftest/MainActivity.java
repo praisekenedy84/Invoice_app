@@ -3,10 +3,9 @@ package com.example.pdftest;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -64,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     TextInputEditText txtIBAN;
     TextInputEditText txtBankAcc;
     TextInputEditText txtSWIFT;
+    TextInputEditText txtRecord;
+    TextInputEditText txtNumero;
     Spinner txtCur;
     private static final String PLACEHOLDER = "N/A";
     private static final String CHANNEL_ID = "MyNotificationChannel";
@@ -71,22 +72,18 @@ public class MainActivity extends AppCompatActivity {
     EditText txtVar;
     EditText txtPrice;
     String userName;// = "Jan Štýbar";
-    String iban = "CZ082700000000484784959";
-    String bankAcc = "placeholder448";
+    String iban;
+    String bankAcc;
     String swift;
+    String record;
     String street;
     String city = "Ostrava";
     String country = "CZECH REPUBLIC";
-    String ico = "15199891";
-    String dic = "CZ295989";
-    String variable = "5919195";
-    String amtStr = "2";
-    String priceStr = "500";
-
-    Intent intent = new Intent(this, MainActivity.class);
-    intent.putExtra("ACTION", "YOUR_ACTION");
-
-    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    String ico;
+    String dic;
+    String variable = "5915";
+    String amtStr;
+    String priceStr;
 
 
     private Button generateQrBtn;
@@ -106,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Displaying invoice creation layout
-    public void loadAddingLayout(View v){
+    public void loadAddingLayout(View v) {
         setContentView(R.layout.new_window);
         btnCreatePDF = findViewById(R.id.btnCreatePdf);
         btnCreatePDF.setOnClickListener(new View.OnClickListener() {
@@ -119,16 +116,17 @@ public class MainActivity extends AppCompatActivity {
         //txtCur = findViewById(R.id.spinner_currency);
         txtPrice = findViewById(R.id.num_price);
         txtAmount = findViewById(R.id.num_amount);
+        txtNumero = findViewById(R.id.edit_numero);
         //ImageView imgQR = findViewById(R.id.image_qrc);
     }
 
     // Leaving current layout
-    public void leaveLayout(View v){
+    public void leaveLayout(View v) {
         setContentView(R.layout.activity_main);
     }
 
     // Displaying personal information layout
-    public void loadInfoLayout(View v){
+    public void loadInfoLayout(View v) {
         setContentView(R.layout.personal_info);
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
 
@@ -159,6 +157,9 @@ public class MainActivity extends AppCompatActivity {
         String retrievedSWIFT = sharedPreferences.getString("SWIFT", "Not set yet");
         txtSWIFT = findViewById(R.id.edit_swift);
         txtSWIFT.setHint(retrievedSWIFT);
+        String retrievedRecord = sharedPreferences.getString("Record", "Not set yet");
+        txtRecord = findViewById(R.id.edit_record);
+        txtRecord.setHint(retrievedRecord);
 
 
         btnSaveInfo = findViewById(R.id.btn_save_info);
@@ -182,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
         bankAcc = txtBankAcc.getText().toString();
         iban = txtIBAN.getText().toString();
         swift = txtSWIFT.getText().toString();
+        record = txtRecord.getText().toString();
 
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -194,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("BankAcc", bankAcc);
         editor.putString("IBAN", iban);
         editor.putString("SWIFT", swift);
+        editor.putString("Record", record);
 
         editor.apply();
     }
@@ -212,6 +215,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Show the notification
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         notificationManager.notify(1, builder.build());
     }
 
@@ -284,12 +297,12 @@ public class MainActivity extends AppCompatActivity {
         int dimen = width < height ? width : height;
         dimen = dimen * 3 / 4;
 
-        //String nameStr = txtName.getText().toString();
-        //String curStr = txtCur.getSelectedItem().toString();
-        //String amtStr = txtAmount.getText().toString();
-        //String priceStr = txtPrice.getText().toString();    ;
+        String customerName = txtName.getText().toString();
+        String curStr = "CZK";// txtCur.getSelectedItem().toString();
+        String amtStr = txtAmount.getText().toString();
+        String priceStr = txtPrice.getText().toString();    ;
         //String varStr = txtVar.getText().toString();
-        String inputCode = "SPD*1.0*ACC:" + iban + "*AM:" + amtStr + ".00*CC:";//+ curStr;
+        String inputCode = "SPD*1.0*ACC:" + iban + "*AM:" + amtStr + ".00*CC:"+ curStr;
         Log.v("EditText", inputCode);
         // setting this dimensions inside our qr code
         // encoder to generate our qr code.
@@ -310,9 +323,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Header
         canvas.drawText("FAKTURA - DAŇOVÝ DOKLAD", leftspace, 45, paint);
+        String numeroStr = txtNumero.getText().toString();
         DateFormat df = new SimpleDateFormat("yyMMdd");
         String dateCode = df.format(new Date());
-        canvas.drawText(dateCode, 490, 45, paint);
+        canvas.drawText(dateCode+numeroStr, 490, 45, paint);
         canvas.drawLine(leftspace, 60, 566,60, paint);
         canvas.drawText("Dodavatel", leftspace, 90, paint);
         canvas.drawText("Odběratel", 310, 90, paint);
@@ -326,14 +340,25 @@ public class MainActivity extends AppCompatActivity {
 
         // Supplier
         int tableftspace = leftspace + 10;
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        String userName = sharedPreferences.getString("User", "Not set yet");
         canvas.drawText(userName != null ? userName : PLACEHOLDER, tableftspace, 130, smallpaintbold);
+        String street = sharedPreferences.getString("Street", "Not set yet");
         canvas.drawText(street != null ? street : PLACEHOLDER, tableftspace, 150, smallpaint);
+        String city = sharedPreferences.getString("City", "Not set yet");
         canvas.drawText(city != null ? city : PLACEHOLDER, tableftspace, 170, smallpaint);
+        String country = sharedPreferences.getString("Country", "Not set yet");
         canvas.drawText(country != null ? country : PLACEHOLDER, tableftspace, 190, smallpaint);
+        String ico = sharedPreferences.getString("ICO", "Not set yet");
         canvas.drawText("IČO: " + (ico != null ? ico : PLACEHOLDER), tableftspace, 210, smallpaint);
+        String dic = sharedPreferences.getString("DIC", "Not set yet");
         canvas.drawText("DIČ: " + (dic != null ? dic : PLACEHOLDER), tableftspace, 230, smallpaint);
+        String bankAcc = sharedPreferences.getString("BankAcc", "Not set yet");
         canvas.drawText(bankAcc != null ? bankAcc : PLACEHOLDER, tableftspace, 245, tinypaint);
+        String iban = sharedPreferences.getString("IBAN", "Not set yet");
         canvas.drawText(iban != null ? iban : PLACEHOLDER, tableftspace, 260, tinypaint);
+        String record = sharedPreferences.getString("Record", "Not set yet");
+        canvas.drawText(record != null ? record : PLACEHOLDER, tableftspace, 275, tinypaint);
 
 
         // Supplied
@@ -384,8 +409,8 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawLine(leftspace, 540, 566,540, paint);
         Integer newline = 530+30;
         canvas.drawText("Doučování", leftspace, newline, tinypaint);
-        canvas.drawText(amtStr, leftspace+80, newline, tinypaint);
-        canvas.drawText(priceStr, leftspace+140, newline, tinypaint);
+        canvas.drawText(amtStr != null ? amtStr : "1", leftspace+80, newline, tinypaint);
+        canvas.drawText(priceStr != null ? priceStr : "500", leftspace+140, newline, tinypaint);
         Float finalCost = Float.parseFloat(amtStr) * Integer.parseInt(priceStr);
         canvas.drawText(Float.toString(finalCost), leftspace+270, newline, tinypaint);
         canvas.drawText(Float.toString(finalCost), leftspace+360, newline, tinypaint);
