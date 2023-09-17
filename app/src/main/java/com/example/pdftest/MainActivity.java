@@ -309,33 +309,6 @@ public class MainActivity extends AppCompatActivity {
         int dimen = width < height ? width : height;
         dimen = dimen * 3 / 4;
 
-        String customerName = txtName.getText().toString();
-        String curStr = "CZK";// txtCur.getSelectedItem().toString();
-        amtStr = txtAmount.getText().toString();
-        if (amtStr.isEmpty() || !amtStr.matches("\\d+")) {
-            amtStr = "1"; // Default value when empty or not a valid number
-        }
-        priceStr = txtPrice.getText().toString();
-        if (priceStr.isEmpty() || !priceStr.matches("\\d+")) {
-            priceStr = "500"; // Default value when empty or not a valid number
-        }
-        //String varStr = txtVar.getText().toString();
-        String inputCode = "SPD*1.0*ACC:" + iban + "*AM:" + amtStr + ".00*CC:"+ curStr;
-        Log.v("EditText", inputCode);
-        // setting this dimensions inside our qr code
-        // encoder to generate our qr code.
-        qrgEncoder = new QRGEncoder(inputCode, null, QRGContents.Type.TEXT, dimen);
-        qrgEncoder.setColorBlack(Color.WHITE);
-        qrgEncoder.setColorWhite(Color.BLACK);
-        //try {
-            // getting our qrcode in the form of bitmap.
-        Bitmap qrBitmap = qrgEncoder.getBitmap();
-        //} catch (WriterException e) {
-            // this method is called for
-            // exception handling.
-         //   Log.e("Tag", e.toString());
-       // }
-
         // 595*842
         int leftspace = 34;
 
@@ -350,13 +323,13 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawText(dateCode+numeroStr, 490, 45, paint);
         canvas.drawLine(leftspace, 60, 566,60, paint);
         canvas.drawText("Dodavatel", leftspace, 90, paint);
-        canvas.drawText("Odběratel", 310, 90, paint);
+        canvas.drawText("Odběratel", 325, 90, paint);
 
         // Rectangle bordering
         RectF drawRect = new RectF();
-        drawRect.set(leftspace, 107, 294,310);
+        drawRect.set(leftspace, 107, 310,310);
         canvas.drawRect(drawRect, borderPaint);
-        drawRect.set(310, 107, 566,310);
+        drawRect.set(325, 107, 566,310);
         canvas.drawRect(drawRect, borderPaint);
 
         // Supplier
@@ -381,20 +354,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         // Supplied
-        canvas.drawText(customerName != null ? customerName : PLACEHOLDER, 320, 130, smallpaintbold);
+        String customerName = txtName.getText().toString();
+        canvas.drawText(customerName != null ? customerName : PLACEHOLDER, 335, 130, smallpaintbold);
 
-        // QR Payment
-        Integer qrtop = 320;
-        Integer qrbottom = 500;
-        Integer qrleft = 386;
-        Integer qrright = 566;
-        canvas.drawLine(qrleft, qrtop,qrright,qrtop, paint);
-        canvas.drawLine(qrleft, qrtop,qrleft,qrbottom, paint);
-        canvas.drawLine(qrright, qrtop,qrright,qrbottom, paint);
-        canvas.drawLine(qrleft, qrbottom,440,qrbottom, paint);
-        canvas.drawLine(510, qrbottom,qrright,qrbottom, paint);
-        canvas.drawText("QR Platba", 450, 505, tinypaint);
-        canvas.drawBitmap(qrBitmap,new Rect((int) (qrBitmap.getWidth()*0.1), (int) (qrBitmap.getHeight()*0.1), (int) (qrBitmap.getWidth()*0.9),(int) (qrBitmap.getHeight()*0.9)), new Rect(396,330,556,490) , null);
+        // QR Info
+        String curStr = "CZK";// txtCur.getSelectedItem().toString();
+        amtStr = txtAmount.getText().toString();
+        if (amtStr.isEmpty() || !amtStr.matches("\\d+")) {
+            amtStr = "1"; // Default value when empty or not a valid number
+        }
+        priceStr = txtPrice.getText().toString();
+        if (priceStr.isEmpty() || !priceStr.matches("\\d+")) {
+            priceStr = "500"; // Default value when empty or not a valid number
+        }
 
         //Invoice details
         Integer secondleft = leftspace + 180;
@@ -439,13 +411,42 @@ public class MainActivity extends AppCompatActivity {
         //Summary
         drawRect.set(150, 650, 450 ,680);
         canvas.drawRect(drawRect, borderPaint);
-        canvas.drawText("Cena celkem: "+Float.toString(finalCost) + " CZK", 170, 673, paint);
+        canvas.drawText("Cena celkem: "+ Float.toString(finalCost) + " CZK", 170, 673, paint);
+
+        // QR code
+        //String varStr = txtVar.getText().toString();
+        String inputCode = "SPD*1.0*ACC:" + iban + "*AM:" + Float.toString(finalCost) + ".00*CC:"+ curStr;
+        // setting this dimensions inside our qr code
+        // encoder to generate our qr code.
+        qrgEncoder = new QRGEncoder(inputCode, null, QRGContents.Type.TEXT, dimen);
+        qrgEncoder.setColorBlack(Color.WHITE);
+        qrgEncoder.setColorWhite(Color.BLACK);
+        //try {
+        // getting our qrcode in the form of bitmap.
+        Bitmap qrBitmap = qrgEncoder.getBitmap();
+        //} catch (WriterException e) {
+        // this method is called for
+        // exception handling.
+        //   Log.e("Tag", e.toString());
+        // }
+
+        Integer qrtop = 320;
+        Integer qrbottom = 500;
+        Integer qrleft = 386;
+        Integer qrright = 566;
+        canvas.drawLine(qrleft, qrtop,qrright,qrtop, paint);
+        canvas.drawLine(qrleft, qrtop,qrleft,qrbottom, paint);
+        canvas.drawLine(qrright, qrtop,qrright,qrbottom, paint);
+        canvas.drawLine(qrleft, qrbottom,440,qrbottom, paint);
+        canvas.drawLine(510, qrbottom,qrright,qrbottom, paint);
+        canvas.drawText("QR Platba", 450, 505, tinypaint);
+        canvas.drawBitmap(qrBitmap,new Rect((int) (qrBitmap.getWidth()*0.1), (int) (qrBitmap.getHeight()*0.1), (int) (qrBitmap.getWidth()*0.9),(int) (qrBitmap.getHeight()*0.9)), new Rect(396,330,556,490) , null);
 
 
         document.finishPage(page);
 
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String fileName = customerName+".pdf";
+        String fileName = "Faktura_"+customerName+"_"+dateCode+numeroStr+".pdf";
         File file = new File(downloadsDir, fileName);
         try {
             FileOutputStream fos = new FileOutputStream(file);
