@@ -59,9 +59,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <!--Amount-->
+        <!--Price-->
         <TextView
-            android:id="@+id/text_street_name"
+            android:id="@+id/text_price"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -74,13 +74,12 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/num_price"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="numberDecimal" />
+                android:hint="500"
+                android:inputType="numberDecimal"/>
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
@@ -116,7 +115,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <!--Variable symbol-->
+        <!--Amount-->
         <TextView
             android:id="@+id/text_country"
             android:layout_width="match_parent"
@@ -131,13 +130,12 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/num_amount"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="numberSigned" />
+                android:hint="1"
+                android:inputType="numberDecimal"/>
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
@@ -193,7 +191,8 @@
                 android:id="@+id/edit_numero"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="hint" />
+                android:hint="1"
+                android:inputType="numberDecimal"/>
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
     <LinearLayout

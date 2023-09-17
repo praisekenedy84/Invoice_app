@@ -63,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     TextInputEditText txtIBAN;
     TextInputEditText txtBankAcc;
     TextInputEditText txtSWIFT;
-    TextInputEditText txtRecord;
     TextInputEditText txtNumero;
     Spinner txtCur;
     private static final String PLACEHOLDER = "N/A";
@@ -75,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     String iban;
     String bankAcc;
     String swift;
-    String record;
     String street;
     String city = "Ostrava";
     String country = "CZECH REPUBLIC";
@@ -84,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     String variable = "5915";
     String amtStr;
     String priceStr;
+    String numeroStr;
 
 
     private Button generateQrBtn;
@@ -157,9 +156,6 @@ public class MainActivity extends AppCompatActivity {
         String retrievedSWIFT = sharedPreferences.getString("SWIFT", "Not set yet");
         txtSWIFT = findViewById(R.id.edit_swift);
         txtSWIFT.setHint(retrievedSWIFT);
-        String retrievedRecord = sharedPreferences.getString("Record", "Not set yet");
-        txtRecord = findViewById(R.id.edit_record);
-        txtRecord.setHint(retrievedRecord);
 
 
         btnSaveInfo = findViewById(R.id.btn_save_info);
@@ -183,20 +179,36 @@ public class MainActivity extends AppCompatActivity {
         bankAcc = txtBankAcc.getText().toString();
         iban = txtIBAN.getText().toString();
         swift = txtSWIFT.getText().toString();
-        record = txtRecord.getText().toString();
 
         SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("User", userName);
-        editor.putString("Street", street);
-        editor.putString("City", city);
-        editor.putString("Country", country);
-        editor.putString("ICO", ico);
-        editor.putString("DIC", dic);
-        editor.putString("BankAcc", bankAcc);
-        editor.putString("IBAN", iban);
-        editor.putString("SWIFT", swift);
-        editor.putString("Record", record);
+        if (userName != null && !userName.isEmpty()) {
+            editor.putString("User", userName);
+        }
+        if (street != null && !street.isEmpty()) {
+            editor.putString("Street", street);
+        }
+        if (city != null && !city.isEmpty()) {
+            editor.putString("City", city);
+        }
+        if (country != null && !country.isEmpty()) {
+            editor.putString("Country", country);
+        }
+        if (ico != null && !ico.isEmpty()) {
+            editor.putString("ICO", ico);
+        }
+        if (dic != null && !dic.isEmpty()) {
+            editor.putString("DIC", dic);
+        }
+        if (bankAcc != null && !bankAcc.isEmpty()) {
+            editor.putString("BankAcc", bankAcc);
+        }
+        if (iban != null && !iban.isEmpty()) {
+            editor.putString("IBAN", iban);
+        }
+        if (swift != null && !swift.isEmpty()) {
+            editor.putString("SWIFT", swift);
+        }
 
         editor.apply();
     }
@@ -299,8 +311,14 @@ public class MainActivity extends AppCompatActivity {
 
         String customerName = txtName.getText().toString();
         String curStr = "CZK";// txtCur.getSelectedItem().toString();
-        String amtStr = txtAmount.getText().toString();
-        String priceStr = txtPrice.getText().toString();    ;
+        amtStr = txtAmount.getText().toString();
+        if (amtStr.isEmpty() || !amtStr.matches("\\d+")) {
+            amtStr = "1"; // Default value when empty or not a valid number
+        }
+        priceStr = txtPrice.getText().toString();
+        if (priceStr.isEmpty() || !priceStr.matches("\\d+")) {
+            priceStr = "500"; // Default value when empty or not a valid number
+        }
         //String varStr = txtVar.getText().toString();
         String inputCode = "SPD*1.0*ACC:" + iban + "*AM:" + amtStr + ".00*CC:"+ curStr;
         Log.v("EditText", inputCode);
@@ -323,7 +341,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Header
         canvas.drawText("FAKTURA - DAŇOVÝ DOKLAD", leftspace, 45, paint);
-        String numeroStr = txtNumero.getText().toString();
+        numeroStr = txtNumero.getText().toString();
+        if (numeroStr.isEmpty() || !numeroStr.matches("\\d+")) {
+            numeroStr = "1"; // Default value when empty or not a valid number
+        }
         DateFormat df = new SimpleDateFormat("yyMMdd");
         String dateCode = df.format(new Date());
         canvas.drawText(dateCode+numeroStr, 490, 45, paint);
@@ -350,15 +371,13 @@ public class MainActivity extends AppCompatActivity {
         String country = sharedPreferences.getString("Country", "Not set yet");
         canvas.drawText(country != null ? country : PLACEHOLDER, tableftspace, 190, smallpaint);
         String ico = sharedPreferences.getString("ICO", "Not set yet");
-        canvas.drawText("IČO: " + (ico != null ? ico : PLACEHOLDER), tableftspace, 210, smallpaint);
+        canvas.drawText("IČO:  " + (ico != null ? ico : PLACEHOLDER), tableftspace, 210, smallpaint);
         String dic = sharedPreferences.getString("DIC", "Not set yet");
-        canvas.drawText("DIČ: " + (dic != null ? dic : PLACEHOLDER), tableftspace, 230, smallpaint);
-        String bankAcc = sharedPreferences.getString("BankAcc", "Not set yet");
-        canvas.drawText(bankAcc != null ? bankAcc : PLACEHOLDER, tableftspace, 245, tinypaint);
+        canvas.drawText("DIČ:  " + (dic != null ? dic : PLACEHOLDER), tableftspace, 230, smallpaint);
         String iban = sharedPreferences.getString("IBAN", "Not set yet");
-        canvas.drawText(iban != null ? iban : PLACEHOLDER, tableftspace, 260, tinypaint);
-        String record = sharedPreferences.getString("Record", "Not set yet");
-        canvas.drawText(record != null ? record : PLACEHOLDER, tableftspace, 275, tinypaint);
+        canvas.drawText("IBAN: "  + (iban != null ? iban : PLACEHOLDER), tableftspace, 250, smallpaint);
+        String bankAcc = sharedPreferences.getString("BankAcc", "Not set yet");
+        canvas.drawText( "Bank. spoj.: " + (bankAcc != null ? bankAcc : PLACEHOLDER), tableftspace, 270, smallpaint);
 
 
         // Supplied
@@ -375,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
         canvas.drawLine(qrleft, qrbottom,440,qrbottom, paint);
         canvas.drawLine(510, qrbottom,qrright,qrbottom, paint);
         canvas.drawText("QR Platba", 450, 505, tinypaint);
-        canvas.drawBitmap(qrBitmap, new Rect(100,100,700,700), new Rect(396,330,556,490) , null);
+        canvas.drawBitmap(qrBitmap,new Rect((int) (qrBitmap.getWidth()*0.1), (int) (qrBitmap.getHeight()*0.1), (int) (qrBitmap.getWidth()*0.9),(int) (qrBitmap.getHeight()*0.9)), new Rect(396,330,556,490) , null);
 
         //Invoice details
         Integer secondleft = leftspace + 180;
