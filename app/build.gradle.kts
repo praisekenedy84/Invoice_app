@@ -39,6 +39,8 @@ dependencies {
     implementation("com.github.androidmads:QRGenerator:1.0.1")
     implementation("com.google.zxing:core:3.2.0")
     implementation("com.google.firebase:protolite-well-known-types:18.0.0")
+    implementation("com.github.yesidlazaro:GmailBackground:1.2.0")
+
     //implementation("androidmads.library.qrgenearator:QRGenearator:1.0.3")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
