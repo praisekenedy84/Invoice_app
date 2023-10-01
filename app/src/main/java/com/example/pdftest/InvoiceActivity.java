@@ -11,6 +11,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -23,6 +24,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -269,9 +271,9 @@ public class InvoiceActivity extends AppCompatActivity {
 
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         String fileName = "Faktura_"+customerName.trim()+"_"+dateCode+numeroStr+".pdf";
-        File file = new File(downloadsDir, fileName);
+        File invoiceFile = new File(downloadsDir, fileName);
         try {
-            FileOutputStream fos = new FileOutputStream(file);
+            FileOutputStream fos = new FileOutputStream(invoiceFile);
             document.writeTo(fos);
             document.close();
             fos.close();
@@ -282,11 +284,32 @@ public class InvoiceActivity extends AppCompatActivity {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        //new SendEmailTask(getApplicationContext()).execute();
+
+        // Sending invoice by email
+        //final String recipientEmail = sharedPreferences.getString("RecipientEmail", "Not set yet");
+        final String recipientEmail = txtEmail.getText().toString();
+        //Uri fileUri = Uri.fromFile(invoiceFile);
+        Uri fileUri = FileProvider.getUriForFile(
+                this, "com.example.pdftest.provider", invoiceFile
+        );
+
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("message/rfc822");
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{recipientEmail});
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Faktura");
+        intent.putExtra(Intent.EXTRA_TEXT, "Dobrý den,\n\n" +
+                "přikládám automaticky generovanou fakturu.\n\n" +
+                "Zdraví,\nHonza Štýbar");
+        intent.putExtra(Intent.EXTRA_STREAM, fileUri);
+        startActivity(Intent.createChooser(intent, "Send Email"));
+        Toast.makeText(this, "Probably sent", Toast.LENGTH_SHORT).show();
+
     }
     // missing handle cases for missing permissions, TODO
 
 }
+
 
 /*
 class SendEmailTask extends AsyncTask<Void, Void, Void> {

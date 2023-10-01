@@ -294,28 +294,11 @@ tools:context=".PersonalSettings">
                 android:orientation="horizontal">
 
                 <!--Account number-->
-                <TextView
-                    android:id="@+id/text_email"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1.5"
-                    android:gravity="center_vertical"
-                    android:text="Email"
-                    android:textSize="20sp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <EditText
-                        android:id="@+id/edit_email"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="textEmailAddress" />
-                </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1"/>
             </LinearLayout>
 
             <LinearLayout
@@ -324,28 +307,11 @@ tools:context=".PersonalSettings">
                 android:orientation="horizontal">
 
                 <!--Account number-->
-                <TextView
-                    android:id="@+id/text_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1.5"
-                    android:gravity="center_vertical"
-                    android:text="Password"
-                    android:textSize="20sp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <EditText
-                        android:id="@+id/edit_password"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="textPassword" />
-                </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1"/>
             </LinearLayout>
 
 

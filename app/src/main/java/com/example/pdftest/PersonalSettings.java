@@ -72,12 +72,6 @@ public class PersonalSettings extends AppCompatActivity {
         String retrievedSWIFT = sharedPreferences.getString("SWIFT", "Not set yet");
         txtSWIFT = findViewById(R.id.edit_swift);
         txtSWIFT.setHint(retrievedSWIFT);
-        String retrievedEmail = sharedPreferences.getString("SenderEmail", "Not set yet");
-        txtEmail = findViewById(R.id.edit_email);
-        txtEmail.setHint(retrievedEmail);
-        String retrievedPassword = sharedPreferences.getString("Password", "Not set yet");
-        txtPassword = findViewById(R.id.edit_password);
-        txtPassword.setHint(retrievedPassword);
 
 
         btnSaveInfo = findViewById(R.id.btn_save_info);
