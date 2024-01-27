@@ -17,12 +17,8 @@ To install the project:
 3. Run the application on an emulator or physical device.
 
 ## Usage
-Describe how to use the application, including navigating between different activities and any specific user interactions.
-
-## Code Structure
-- `MainActivity.java`: [Describe its role and functionalities in detail].
-- `PersonalSettings.java`: [Elaborate on the settings or preferences it manages].
-- `InvoiceActivity.java`: [Detail the invoice-related functionalities it provides].
+Through the main window the user has to first acces the personal details section through the button with an icon of a person on it where he/she should fill in any personal info that should appear on the invoice
+From than on any time an invoice needs to be generated you can simply click on the plus button, fill n the specific info and and click generate invoice
 
 ## License
 MIT license
