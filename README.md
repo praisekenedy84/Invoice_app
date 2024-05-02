@@ -2,8 +2,8 @@
 
 ## Introduction
 This app enables user to create simple pdf invoice with automatically generated qr code within seconds. 
-When pdf is created options for sharing sending it either via email or other social networks pos up. 
-Especially suitable where a lot of invoices has to be created frequently
+When pdf is created options for sharing sending it either via email or other social networks. 
+Especially suitable where a lot of invoices have to be created frequently
 
 ## Features
 - **Main Activity**: The central hub of the application, handling the choice between personal settings button and create invoice button.
